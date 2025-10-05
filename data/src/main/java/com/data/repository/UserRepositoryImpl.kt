@@ -148,8 +148,8 @@ constructor(
         return try {
             val response = userService.deleteUser(userId)
             if (response.isSuccessful) {
-                val deletedUserId: String? = response.body()
-                if (deletedUserId != null && deletedUserId == userId) {
+                val deleteResponse = response.body()
+                if (deleteResponse != null && deleteResponse.id == userId) {
                     Result.Success(Unit)
                 } else {
                     Result.Error("Unexpected response from server")

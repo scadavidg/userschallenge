@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.ui.tooling)
+    debugImplementation(libs.ui.tooling)
     implementation(libs.androidx.material3)
     
     // ===== UI COMPONENTS =====
@@ -64,6 +66,9 @@ dependencies {
     
     // ===== SWIPE ACTIONS =====
     implementation(libs.swipe)
+    
+    // ===== PULL TO REFRESH =====
+    implementation(libs.accompanist.swiperefresh)
 
     // ===== DEPENDENCY INJECTION =====
     implementation(libs.hilt.android)

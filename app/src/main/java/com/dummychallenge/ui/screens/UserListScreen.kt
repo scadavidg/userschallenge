@@ -1,18 +1,15 @@
 package com.dummychallenge.ui.screens
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.dummychallenge.ui.components.AppScaffold
+import com.dummychallenge.ui.components.DeleteConfirmationDialog
+import com.dummychallenge.ui.components.ScreenType
 import com.dummychallenge.ui.components.UserListPagingComponent
 import com.dummychallenge.ui.navigation.Screen
 import com.dummychallenge.viewmodel.UserListScreenViewModel
@@ -30,21 +27,24 @@ fun UserListScreen(
     // collectAsState converts StateFlow to State for UI consumption
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    navController.navigate("createUser")
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add User"
-                )
-            }
+    // Refresh list when returning from other screens (e.g., after deleting a user)
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(backStackEntry?.destination?.route) {
+        // Only refresh when we're actually on the user list screen and it's a navigation change
+        if (backStackEntry?.destination?.route == "userList") {
+            // Add a small delay to ensure the screen is fully loaded
+            kotlinx.coroutines.delay(100)
+            viewModel.refresh()
         }
-    ) { paddingValues ->
+    }
+
+    AppScaffold(
+        screenType = ScreenType.USER_LIST,
+        title = "User List",
+        onAddUserClick = {
+            navController.navigate(Screen.CreateUser.route)
+        }
+    ) {
         UserListPagingComponent(
             users = uiState.users,
             isLoading = uiState.isLoading,
@@ -57,8 +57,8 @@ fun UserListScreen(
             onEditClick = { userId ->
                 navController.navigate(Screen.EditUser.createRoute(userId))
             },
-            onDeleteClick = { _ ->
-                // TODO: Implement delete functionality
+            onDeleteClick = { userId ->
+                viewModel.showDeleteDialog(userId)
             },
             onLoadMore = {
                 viewModel.loadMoreUsers()
@@ -67,9 +67,28 @@ fun UserListScreen(
                 viewModel.refresh()
             },
             onCreateUser = {
-                navController.navigate("createUser")
+                navController.navigate(Screen.CreateUser.route)
             },
-            modifier = Modifier.padding(paddingValues)
+            onRefresh = {
+                viewModel.refresh()
+            }
         )
+
+        // Delete confirmation dialog
+        if (uiState.showDeleteDialog) {
+            val userToDelete = uiState.users.find { it.id == uiState.userToDelete }
+            val userName = "${userToDelete?.firstName} ${userToDelete?.lastName}"
+
+            DeleteConfirmationDialog(
+                isVisible = uiState.showDeleteDialog,
+                userName = userName,
+                onConfirm = {
+                    viewModel.deleteUser()
+                },
+                onDismiss = {
+                    viewModel.hideDeleteDialog()
+                }
+            )
+        }
     }
 }

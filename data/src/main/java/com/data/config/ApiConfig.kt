@@ -29,5 +29,5 @@ object ApiConfig {
 
     // Default Values
     const val DEFAULT_PAGE = 0
-    const val DEFAULT_LIMIT = 20
+    const val DEFAULT_LIMIT = 10
 }

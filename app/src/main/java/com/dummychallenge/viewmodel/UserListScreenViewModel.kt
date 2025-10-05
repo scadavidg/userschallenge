@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.domain.models.Result
 import com.domain.models.UserPreview
+import com.domain.usecases.DeleteUserUseCase
 import com.domain.usecases.GetAllUserUseCase
+import com.dummychallenge.utils.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserListScreenViewModel @Inject constructor(
-    private val getAllUserUseCase: GetAllUserUseCase
+    private val getAllUserUseCase: GetAllUserUseCase,
+    private val deleteUserUseCase: DeleteUserUseCase
 ) : ViewModel() {
 
     // Private mutable state for internal updates
@@ -27,9 +30,17 @@ class UserListScreenViewModel @Inject constructor(
     private var currentPage = 0
     private var totalPages = 0
     private var isLoadingMore = false
+    
+    // Track locally deleted users to filter them from API responses
+    private val locallyDeletedUsers = mutableSetOf<String>()
 
     init {
         loadInitialData()
+    }
+    
+    // Helper function to filter out locally deleted users
+    private fun filterDeletedUsers(users: List<UserPreview>): List<UserPreview> {
+        return users.filter { user -> !locallyDeletedUsers.contains(user.id) }
     }
 
     private fun loadInitialData() {
@@ -39,13 +50,14 @@ class UserListScreenViewModel @Inject constructor(
             when (val result = getAllUserUseCase(0)) {
                 is Result.Success -> {
                     val userList = result.data
-                    cachedPages[0] = userList.data
+                    val filteredUsers = filterDeletedUsers(userList.data)
+                    cachedPages[0] = filteredUsers
                     currentPage = 0
                     totalPages = (userList.total / userList.limit) + if (userList.total % userList.limit > 0) 1 else 0
                     
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        users = userList.data,
+                        users = filteredUsers,
                         hasMorePages = userList.hasMorePages,
                         error = null
                     )
@@ -53,7 +65,7 @@ class UserListScreenViewModel @Inject constructor(
                 is Result.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = result.message
+                        error = ErrorHandler.getErrorMessage(result.message)
                     )
                 }
                 is Result.Loading -> {
@@ -75,9 +87,10 @@ class UserListScreenViewModel @Inject constructor(
             // Check cache first to avoid unnecessary network calls
             if (cachedPages.containsKey(nextPage)) {
                 val cachedUsers = cachedPages[nextPage]!!
+                val filteredCachedUsers = filterDeletedUsers(cachedUsers)
                 val currentUsers = _uiState.value.users
                 _uiState.value = _uiState.value.copy(
-                    users = currentUsers + cachedUsers,
+                    users = currentUsers + filteredCachedUsers,
                     isLoadingMore = false,
                     hasMorePages = nextPage + 1 < totalPages
                 )
@@ -89,11 +102,12 @@ class UserListScreenViewModel @Inject constructor(
             when (val result = getAllUserUseCase(nextPage)) {
                 is Result.Success -> {
                     val userList = result.data
-                    cachedPages[nextPage] = userList.data
+                    val filteredUsers = filterDeletedUsers(userList.data)
+                    cachedPages[nextPage] = filteredUsers
                     
                     val currentUsers = _uiState.value.users
                     _uiState.value = _uiState.value.copy(
-                        users = currentUsers + userList.data,
+                        users = currentUsers + filteredUsers,
                         isLoadingMore = false,
                         hasMorePages = userList.hasMorePages
                     )
@@ -116,12 +130,73 @@ class UserListScreenViewModel @Inject constructor(
 
     fun refresh() {
         cachedPages.clear()
+        locallyDeletedUsers.clear() // Clear locally deleted users on refresh
         currentPage = 0
         loadInitialData()
     }
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun showDeleteDialog(userId: String) {
+        _uiState.value = _uiState.value.copy(
+            showDeleteDialog = true,
+            userToDelete = userId
+        )
+    }
+
+    fun hideDeleteDialog() {
+        _uiState.value = _uiState.value.copy(
+            showDeleteDialog = false,
+            userToDelete = null
+        )
+    }
+
+    fun deleteUser() {
+        val userId = _uiState.value.userToDelete ?: return
+        
+        // Add to locally deleted users list
+        locallyDeletedUsers.add(userId)
+        
+        // Immediately remove user from UI for better UX
+        val currentUsers = _uiState.value.users
+        val updatedUsers = currentUsers.filter { it.id != userId }
+        
+        _uiState.value = _uiState.value.copy(
+            users = updatedUsers,
+            showDeleteDialog = false,
+            userToDelete = null
+        )
+        
+        // Perform API call in background
+        viewModelScope.launch {
+            when (val result = deleteUserUseCase(userId)) {
+                is Result.Success -> {
+                    // Remove user from cached pages to ensure consistency
+                    cachedPages.forEach { (pageNumber, users) ->
+                        cachedPages[pageNumber] = users.filter { it.id != userId }
+                    }
+                    
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = null
+                    )
+                }
+                is Result.Error -> {
+                    // If API call fails, restore the user to the list
+                    locallyDeletedUsers.remove(userId) // Remove from deleted list
+                    _uiState.value = _uiState.value.copy(
+                        users = currentUsers, // Restore original list
+                        isLoading = false,
+                        error = ErrorHandler.getErrorMessage(result.message)
+                    )
+                }
+                is Result.Loading -> {
+                    // Loading state is already handled above
+                }
+            }
+        }
     }
 }
 
@@ -135,5 +210,8 @@ data class UserListUiState(
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
     val hasMorePages: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val showDeleteDialog: Boolean = false,
+    val userToDelete: String? = null,
+    val updateTrigger: Long = System.currentTimeMillis() // Force recomposition when users change
 )

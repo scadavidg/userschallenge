@@ -1,6 +1,7 @@
 package com.data.service
 
 import com.data.config.ApiConfig
+import com.data.dto.DeleteUserResponseDto
 import com.data.dto.ListResponseDto
 import com.data.dto.UserCreateDto
 import com.data.dto.UserFullDto
@@ -74,5 +75,5 @@ interface UserService {
     @DELETE(ApiConfig.USER_DELETE_ENDPOINT)
     suspend fun deleteUser(
         @Path(ApiConfig.ID_PARAM) id: String,
-    ): Response<String>
+    ): Response<DeleteUserResponseDto>
 }
