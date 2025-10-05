@@ -1,6 +1,7 @@
 package com.domain.usecases
 
 import com.domain.models.Result
+import com.domain.models.UserList
 import com.domain.models.UserPreview
 import com.domain.repository.UserRepository
 import io.mockk.coEvery
@@ -54,14 +55,20 @@ class ListAllUserUseCaseTest {
                         picture = "picture2.jpg",
                     )
                 )
-                coEvery { userRepository.getAllUsers() } returns Result.Success(expectedUsers)
+                val expectedUserList = UserList(
+                    data = expectedUsers,
+                    page = 0,
+                    limit = 20,
+                    total = 2
+                )
+                coEvery { userRepository.getAllUsers(0) } returns Result.Success(expectedUserList)
 
                 // When
-                val result = listAllUserUseCase()
+                val result = listAllUserUseCase(0)
 
                 // Then
                 assertTrue(result is Result.Success)
-                assertEquals(expectedUsers, result.data)
+                assertEquals(expectedUserList, result.data)
             }
 
             @Test
@@ -69,14 +76,20 @@ class ListAllUserUseCaseTest {
             fun `should return Success with empty list when no users exist`() = runTest {
                 // Given
                 val expectedUsers = emptyList<UserPreview>()
-                coEvery { userRepository.getAllUsers() } returns Result.Success(expectedUsers)
+                val expectedUserList = UserList(
+                    data = expectedUsers,
+                    page = 0,
+                    limit = 20,
+                    total = 0
+                )
+                coEvery { userRepository.getAllUsers(0) } returns Result.Success(expectedUserList)
 
                 // When
-                val result = listAllUserUseCase()
+                val result = listAllUserUseCase(0)
 
                 // Then
                 assertTrue(result is Result.Success)
-                assertEquals(expectedUsers, result.data)
+                assertEquals(expectedUserList, result.data)
             }
         }
 
@@ -89,10 +102,10 @@ class ListAllUserUseCaseTest {
             fun `should return Error with message`() = runTest {
                 // Given
                 val errorMessage = "Failed to fetch users"
-                coEvery { userRepository.getAllUsers() } returns Result.Error(errorMessage)
+                coEvery { userRepository.getAllUsers(0) } returns Result.Error(errorMessage)
 
                 // When
-                val result = listAllUserUseCase()
+                val result = listAllUserUseCase(0)
 
                 // Then
                 assertTrue(result is Result.Error)
@@ -108,10 +121,10 @@ class ListAllUserUseCaseTest {
             @DisplayName("Then should return Loading")
             fun `should return Loading`() = runTest {
                 // Given
-                coEvery { userRepository.getAllUsers() } returns Result.Loading
+                coEvery { userRepository.getAllUsers(0) } returns Result.Loading
 
                 // When
-                val result = listAllUserUseCase()
+                val result = listAllUserUseCase(0)
 
                 // Then
                 assertTrue(result is Result.Loading)
@@ -127,11 +140,11 @@ class ListAllUserUseCaseTest {
             fun `should propagate the exception`() = runTest {
                 // Given
                 val exception = RuntimeException("Database connection failed")
-                coEvery { userRepository.getAllUsers() } throws exception
+                coEvery { userRepository.getAllUsers(0) } throws exception
 
                 // When & Then
                 assertThrows<RuntimeException> {
-                    runTest { listAllUserUseCase() }
+                    runTest { listAllUserUseCase(0) }
                 }
             }
         }

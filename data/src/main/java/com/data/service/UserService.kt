@@ -14,6 +14,11 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+/**
+ * Retrofit service interface defining API endpoints.
+ * Retrofit annotations (@GET, @POST, etc.) map to HTTP methods and endpoints.
+ * @Query and @Path annotations handle URL parameters and path variables.
+ */
 interface UserService {
     /**
      * Get list of users sorted by registration date.
@@ -25,6 +30,15 @@ interface UserService {
         @Query(ApiConfig.PAGE_PARAM) page: Int = ApiConfig.DEFAULT_PAGE,
         @Query(ApiConfig.LIMIT_PARAM) limit: Int = ApiConfig.DEFAULT_LIMIT,
         @Query(ApiConfig.CREATED_PARAM) created: String? = null,
+    ): Response<ListResponseDto<UserPreviewDto>>
+
+    /**
+     * Get users for paging
+     */
+    @GET(ApiConfig.USER_ENDPOINT)
+    suspend fun getUsers(
+        @Query(ApiConfig.PAGE_PARAM) page: Int,
+        @Query(ApiConfig.LIMIT_PARAM) limit: Int
     ): Response<ListResponseDto<UserPreviewDto>>
 
     /**

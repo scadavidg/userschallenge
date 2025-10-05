@@ -1,8 +1,8 @@
 package com.domain.usecases
 
+import com.domain.models.Location
 import com.domain.models.Result
 import com.domain.models.UserDetail
-import com.domain.models.Location
 import com.domain.repository.UserRepository
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -15,20 +15,20 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@DisplayName("GetUserByIdUseCase Tests")
+@DisplayName("GetUserDetailUseCase Tests")
 class GetUserByIdUseCaseTest {
 
     private lateinit var userRepository: UserRepository
-    private lateinit var getUserByIdUseCase: GetUserByIdUseCase
+    private lateinit var getUserDetailUseCase: GetUserDetailUseCase
 
     @BeforeEach
     fun setUp() {
         userRepository = mockk()
-        getUserByIdUseCase = GetUserByIdUseCase(userRepository)
+        getUserDetailUseCase = GetUserDetailUseCase(userRepository)
     }
 
     @Nested
-    @DisplayName("Given a GetUserByIdUseCase")
+    @DisplayName("Given a GetUserDetailUseCase")
     inner class GivenGetUserByIdUseCase {
 
         @Nested
@@ -63,7 +63,7 @@ class GetUserByIdUseCaseTest {
                 coEvery { userRepository.getUserById(userId) } returns Result.Success(expectedUser)
 
                 // When
-                val result = getUserByIdUseCase(userId)
+                val result = getUserDetailUseCase(userId)
 
                 // Then
                 assertTrue(result is Result.Success)
@@ -84,7 +84,7 @@ class GetUserByIdUseCaseTest {
                 coEvery { userRepository.getUserById(userId) } returns Result.Error(errorMessage)
 
                 // When
-                val result = getUserByIdUseCase(userId)
+                val result = getUserDetailUseCase(userId)
 
                 // Then
                 assertTrue(result is Result.Error)
@@ -100,7 +100,7 @@ class GetUserByIdUseCaseTest {
                 coEvery { userRepository.getUserById(userId) } returns Result.Error(errorMessage)
 
                 // When
-                val result = getUserByIdUseCase(userId)
+                val result = getUserDetailUseCase(userId)
 
                 // Then
                 assertTrue(result is Result.Error)
@@ -120,7 +120,7 @@ class GetUserByIdUseCaseTest {
                 coEvery { userRepository.getUserById(userId) } returns Result.Loading
 
                 // When
-                val result = getUserByIdUseCase(userId)
+                val result = getUserDetailUseCase(userId)
 
                 // Then
                 assertTrue(result is Result.Loading)
@@ -141,7 +141,7 @@ class GetUserByIdUseCaseTest {
 
                 // When & Then
                 assertThrows<RuntimeException> {
-                    runTest { getUserByIdUseCase(userId) }
+                    runTest { getUserDetailUseCase(userId) }
                 }
             }
         }
@@ -178,7 +178,7 @@ class GetUserByIdUseCaseTest {
                 coEvery { userRepository.getUserById(userId) } returns Result.Success(expectedUser)
 
                 // When
-                getUserByIdUseCase(userId)
+                getUserDetailUseCase(userId)
 
                 // Then
                 // MockK automatically verifies the call was made with the correct parameter

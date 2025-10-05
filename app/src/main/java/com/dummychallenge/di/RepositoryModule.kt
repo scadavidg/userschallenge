@@ -1,4 +1,4 @@
-package com.data.di
+package com.dummychallenge.di
 
 import com.data.repository.UserRepositoryImpl
 import com.domain.repository.UserRepository

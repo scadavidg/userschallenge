@@ -8,6 +8,11 @@ import com.domain.models.Location
 import com.domain.models.UserDetail
 import com.domain.models.UserPreview
 
+/**
+ * Mapper object that converts between DTOs (Data Transfer Objects) and Domain models.
+ * This follows Clean Architecture by keeping data layer models separate from domain models.
+ * Extension functions make the mapping calls more readable.
+ */
 object UserMapper {
     fun UserPreviewDto.toDomain(): UserPreview {
         return UserPreview(
@@ -67,6 +72,7 @@ object UserMapper {
             firstName = this.firstName,
             lastName = this.lastName,
             email = this.email,
+            // takeIf returns null if condition is false, used for optional fields
             title = this.title.takeIf { it.isNotEmpty() },
             gender = this.gender.takeIf { it.isNotEmpty() },
             dateOfBirth = this.dateOfBirth.takeIf { it.isNotEmpty() },

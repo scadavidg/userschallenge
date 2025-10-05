@@ -41,6 +41,7 @@ dependencies {
 
     // ===== DEPENDENCY INJECTION =====
     implementation(libs.hilt.android)
+    implementation(libs.androidx.paging.common.android)
     ksp(libs.hilt.android.compiler)
 
     // ===== NETWORKING =====

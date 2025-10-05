@@ -10,6 +10,9 @@ object ApiConfig {
     // API Key Configuration
     const val API_KEY_HEADER = "app-id"
     const val API_KEY_VALUE = "63473330c1927d386ca6a3a5"
+    
+    // Default Images
+    const val DEFAULT_PROFILE_IMAGE_URL = "https://st4.depositphotos.com/29453910/37778/v/450/depositphotos_377785406-stock-illustration-hand-drawn-modern-man-avatar.jpg"
 
     // User Endpoints
     const val USER_ENDPOINT = "user"

@@ -1,6 +1,5 @@
 package com.data.di
 
-import com.data.config.ApiConfig
 import com.data.service.UserService
 import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
@@ -11,18 +10,18 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-@DisplayName("DataModule Tests")
+@DisplayName("NetworkModule Tests")
 class DataModuleTest {
-    private lateinit var dataModule: DataModule
+    private lateinit var dataModule: NetworkModule
 
     @BeforeEach
     fun setUp() {
         // Given
-        dataModule = DataModule
+        dataModule = NetworkModule
     }
 
     @Nested
-    @DisplayName("Given DataModule")
+    @DisplayName("Given NetworkModule")
     inner class GivenDataModule {
         @Nested
         @DisplayName("When provideMoshi is called")

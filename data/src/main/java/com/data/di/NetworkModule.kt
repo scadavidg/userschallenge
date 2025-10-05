@@ -1,4 +1,4 @@
-package com.data.network
+package com.data.di
 
 import com.data.config.ApiConfig
 import com.data.service.UserService
@@ -16,6 +16,11 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
+/**
+ * Hilt module for providing network-related dependencies.
+ * Modules tell Hilt how to create dependencies that can't be constructor-injected.
+ * SingletonComponent ensures these dependencies live for the entire app lifecycle.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -30,44 +35,43 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        val loggingInterceptor =
-            HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }
-
-        val apiKeyInterceptor = Interceptor { chain ->
-            val originalRequest = chain.request()
-            val requestWithApiKey = originalRequest.newBuilder()
-                .addHeader(ApiConfig.API_KEY_HEADER, ApiConfig.API_KEY_VALUE)
-                .build()
-            chain.proceed(requestWithApiKey)
-        }
-
         return OkHttpClient.Builder()
-            .addInterceptor(apiKeyInterceptor)
-            .addInterceptor(loggingInterceptor)
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                },
+            )
+            .addInterceptor(createApiKeyInterceptor())
             .connectTimeout(ApiConfig.CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(ApiConfig.READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .writeTimeout(ApiConfig.WRITE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build()
+    }
+
+    /**
+     * Creates an interceptor that adds API key header to all requests.
+     * Interceptors modify requests/responses before they are sent/received.
+     */
+    private fun createApiKeyInterceptor(): Interceptor {
+        return Interceptor { chain ->
+            val originalRequest = chain.request()
+            val newRequest = originalRequest.newBuilder()
+                .addHeader(ApiConfig.API_KEY_HEADER, ApiConfig.API_KEY_VALUE)
+                .build()
+            chain.proceed(newRequest)
+        }
     }
 
     @Provides
     @Singleton
-    fun provideRetrofit(
+    fun provideUserService(
         okHttpClient: OkHttpClient,
         moshi: Moshi,
-    ): Retrofit {
+    ): UserService {
         return Retrofit.Builder()
-            .baseUrl("https://dummyapi.io/data/v1/") // Base URL for DummyAPI
+            .baseUrl(ApiConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserService(retrofit: Retrofit): UserService {
-        return retrofit.create(UserService::class.java)
+            .create(UserService::class.java)
     }
 }

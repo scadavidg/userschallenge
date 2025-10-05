@@ -74,18 +74,18 @@ class UserRepositoryImplTest {
                         )
                     val successResponse = Response.success(listResponse)
 
-                    coEvery { userService.getAllUsers() } returns successResponse
+                    coEvery { userService.getUsers(0, 20) } returns successResponse
 
                     // When
-                    val result = userRepository.getAllUsers()
+                    val result = userRepository.getAllUsers(0)
 
                     // Then
                     assertTrue(result is Result.Success)
-                    assertEquals(2, result.data.size)
-                    assertEquals("John", result.data[0].firstName)
-                    assertEquals("Doe", result.data[0].lastName)
-                    assertEquals("Jane", result.data[1].firstName)
-                    assertEquals("Smith", result.data[1].lastName)
+                    assertEquals(2, result.data.data.size)
+                    assertEquals("John", result.data.data[0].firstName)
+                    assertEquals("Doe", result.data.data[0].lastName)
+                    assertEquals("Jane", result.data.data[1].firstName)
+                    assertEquals("Smith", result.data.data[1].lastName)
                 }
 
             @Test
@@ -95,10 +95,10 @@ class UserRepositoryImplTest {
                     // Given
                     val successResponse = Response.success<ListResponseDto<UserPreviewDto>>(null)
 
-                    coEvery { userService.getAllUsers() } returns successResponse
+                    coEvery { userService.getUsers(0, 20) } returns successResponse
 
                     // When
-                    val result = userRepository.getAllUsers()
+                    val result = userRepository.getAllUsers(0)
 
                     // Then
                     assertTrue(result is Result.Error)
@@ -116,10 +116,10 @@ class UserRepositoryImplTest {
                             "Internal Server Error".toResponseBody("text/plain".toMediaType()),
                         )
 
-                    coEvery { userService.getAllUsers() } returns errorResponse
+                    coEvery { userService.getUsers(0, 20) } returns errorResponse
 
                     // When
-                    val result = userRepository.getAllUsers()
+                    val result = userRepository.getAllUsers(0)
 
                     // Then
                     assertTrue(result is Result.Error)
@@ -140,10 +140,10 @@ class UserRepositoryImplTest {
                             ),
                         )
 
-                    coEvery { userService.getAllUsers() } throws httpException
+                    coEvery { userService.getUsers(0, 20) } throws httpException
 
                     // When
-                    val result = userRepository.getAllUsers()
+                    val result = userRepository.getAllUsers(0)
 
                     // Then
                     assertTrue(result is Result.Error)
@@ -158,10 +158,10 @@ class UserRepositoryImplTest {
                     // Given
                     val ioException = IOException("Network connection failed")
 
-                    coEvery { userService.getAllUsers() } throws ioException
+                    coEvery { userService.getUsers(0, 20) } throws ioException
 
                     // When
-                    val result = userRepository.getAllUsers()
+                    val result = userRepository.getAllUsers(0)
 
                     // Then
                     assertTrue(result is Result.Error)
@@ -176,10 +176,10 @@ class UserRepositoryImplTest {
                     // Given
                     val unexpectedException = RuntimeException("Unexpected error")
 
-                    coEvery { userService.getAllUsers() } throws unexpectedException
+                    coEvery { userService.getUsers(0, 20) } throws unexpectedException
 
                     // When
-                    val result = userRepository.getAllUsers()
+                    val result = userRepository.getAllUsers(0)
 
                     // Then
                     assertTrue(result is Result.Error)
