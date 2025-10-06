@@ -10,6 +10,7 @@ data class UserDetail(
     val email: String,
     val dateOfBirth: String,
     val phone: String,
+    val country: String?,
     val location: Location?,
     val registerDate: String,
     val updatedDate: String

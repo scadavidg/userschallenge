@@ -95,14 +95,14 @@ constructor(
                 }
             } else {
                 when (response.code()) {
-                    400 -> Result.Error("Invalid user data - firstName, lastName, and email are required")
+                    400 -> Result.Error("Invalid user data - firstName, lastName, and email are required. Email must be unique.")
                     409 -> Result.Error("User already exists")
                     else -> Result.Error("Failed to create user: ${response.code()} ${response.message()}")
                 }
             }
         } catch (e: HttpException) {
             when (e.code()) {
-                400 -> Result.Error("Invalid user data - firstName, lastName, and email are required")
+                400 -> Result.Error("Invalid user data - firstName, lastName, and email are required. Email must be unique.")
                 409 -> Result.Error("User already exists")
                 else -> Result.Error("HTTP error: ${e.code()} ${e.message()}")
             }

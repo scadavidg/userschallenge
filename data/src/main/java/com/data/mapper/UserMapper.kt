@@ -35,6 +35,7 @@ object UserMapper {
             email = this.email,
             dateOfBirth = this.dateOfBirth,
             phone = this.phone,
+            country = this.location?.country,
             location = this.location?.toDomain(),
             registerDate = this.registerDate,
             updatedDate = this.registerDate, // Using registerDate as fallback
@@ -93,6 +94,7 @@ object UserMapper {
             email = this.email,
             dateOfBirth = this.dateOfBirth ?: "",
             phone = this.phone ?: "",
+            country = this.location?.country,
             location = this.location?.toDomain(),
             registerDate = "", // Will be set by server
             updatedDate = "", // Will be set by server
