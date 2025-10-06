@@ -560,13 +560,6 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](L
 - **Equipo de Android** - Por Jetpack Compose y herramientas modernas de Android
 - **Comunidad de Código Abierto** - Por las increíbles librerías utilizadas
 
-## 📞 Soporte
-
-Para soporte y preguntas:
-- **Issues** - Crear un issue en GitHub
-- **Discussions** - Usar GitHub Discussions para preguntas
-- **Documentación** - Revisar el wiki para guías detalladas
-
 ## 📊 Métricas del Proyecto
 
 ### Calidad de Código
