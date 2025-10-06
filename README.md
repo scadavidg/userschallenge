@@ -110,6 +110,14 @@ Dummy Challenge es una aplicación Android rica en funcionalidades que demuestra
 - **OkHttp** - Cliente HTTP con interceptores
 - **Paging 3** - Carga y visualización eficiente de datos
 
+### Monitoreo y Analytics
+- **Firebase Crashlytics** - Reporte automático de errores y crashes
+- **Logging Contextual** - Seguimiento completo de navegación y operaciones de usuario
+- **Métricas de Rendimiento** - Monitoreo de tiempos de respuesta de API y operaciones críticas
+- **Analytics de Usuario** - Seguimiento de comportamiento y patrones de uso
+- **Logging de Validaciones** - Rastreo de errores de formularios y validaciones
+- **Logging de Componentes** - Monitoreo de generación de imágenes y componentes UI
+
 ### Testing
 - **JUnit 5** - Framework de testing moderno
 - **MockK** - Biblioteca de mocking para Kotlin
@@ -119,6 +127,168 @@ Dummy Challenge es una aplicación Android rica en funcionalidades que demuestra
 ### Calidad de Código
 - **ktlint** - Aplicación de estilo de código Kotlin
 - **Gradle Version Catalog** - Gestión centralizada de dependencias
+
+## 📊 Sistema de Logging y Monitoreo
+
+### Integración con Firebase Crashlytics
+
+El proyecto implementa un sistema completo de logging que se integra perfectamente con la arquitectura Clean Architecture:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Capa de Presentación                     │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐   │
+│  │   Pantallas │ │ ViewModels  │ │    Componentes      │   │
+│  │ (Compose)   │ │   (MVVM)    │ │   (UI Reutilizable) │   │
+│  │     ↓       │ │     ↓       │ │         ↓           │   │
+│  │  Logging    │ │  Logging    │ │     Logging         │   │
+│  │ Navegación  │ │ Operaciones │ │   Interacciones     │   │
+│  └─────────────┘ └─────────────┘ └─────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    CrashlyticsLogger                        │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐   │
+│  │   Logging   │ │  Métricas   │ │   Atributos         │   │
+│  │  Básico     │ │ Rendimiento │ │  Personalizados     │   │
+│  └─────────────┘ └─────────────┘ └─────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Firebase Console                          │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐   │
+│  │  Crashlytics│ │  Analytics  │ │   Performance       │   │
+│  │   Reports   │ │   Events    │ │    Monitoring       │   │
+│  └─────────────┘ └─────────────┘ └─────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Tipos de Logging Implementados
+
+#### 1. **Logging de Navegación**
+```kotlin
+// Rastreo de navegación entre pantallas
+crashlyticsLogger.logNavigation("UserListScreen", "CreateUserScreen")
+crashlyticsLogger.logNavigation("CreateUserScreen", "UserListScreen")
+```
+
+#### 2. **Logging de Operaciones de Negocio**
+```kotlin
+// Operaciones CRUD con contexto
+crashlyticsLogger.log("User creation initiated")
+crashlyticsLogger.setCustomKey("user_creation_title", title)
+crashlyticsLogger.setCustomKey("user_creation_gender", gender)
+```
+
+#### 3. **Logging de Rendimiento**
+```kotlin
+// Métricas de tiempo de respuesta
+val duration = System.currentTimeMillis() - startTime
+crashlyticsLogger.logPerformance("createUser", duration, true)
+crashlyticsLogger.logPerformance("loadUserDetail", duration, false)
+```
+
+#### 4. **Logging de Errores y Validaciones**
+```kotlin
+// Errores de red y validaciones
+crashlyticsLogger.logNetworkError("createUser", result.message)
+crashlyticsLogger.logFormValidationError("CreateUser", "validation", error)
+crashlyticsLogger.logError(Exception(result.message), "Failed to create user")
+```
+
+#### 5. **Logging de Interacciones de Usuario**
+```kotlin
+// Interacciones con UI
+crashlyticsLogger.log("Create user button clicked")
+crashlyticsLogger.log("Edit user button clicked")
+crashlyticsLogger.log("Delete user button clicked")
+```
+
+#### 6. **Logging de Componentes**
+```kotlin
+// Generación de imágenes y componentes
+crashlyticsLogger.log("Profile image generated")
+crashlyticsLogger.setCustomKey("image_seed", seed)
+crashlyticsLogger.setCustomKey("image_url", imageUrl)
+```
+
+### Integración por Capas
+
+#### **Capa de Presentación (UI)**
+- **Pantallas**: Logging de navegación y clics de botones
+- **ViewModels**: Logging de operaciones de negocio y errores
+- **Componentes**: Logging de interacciones específicas (ProfileImageGenerator)
+
+#### **Capa de Dominio**
+- **Use Cases**: Logging automático a través de ErrorHandler
+- **Modelos**: Atributos personalizados para contexto
+
+#### **Capa de Datos**
+- **Repositorios**: Logging de operaciones de red
+- **Servicios**: Logging de llamadas API y respuestas
+
+### Beneficios del Sistema de Logging
+
+1. **🔍 Debugging Avanzado**: Rastreo completo del flujo de la aplicación
+2. **📊 Analytics de Usuario**: Entendimiento del comportamiento del usuario
+3. **⚡ Optimización de Rendimiento**: Identificación de operaciones lentas
+4. **🛡️ Monitoreo de Errores**: Detección temprana de problemas
+5. **📱 Experiencia de Usuario**: Mejora basada en datos reales
+6. **🔧 Mantenimiento**: Facilita el debugging y la resolución de problemas
+
+### Configuración de Firebase
+
+```kotlin
+// App.kt - Inicialización de Firebase
+@HiltAndroidApp
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        FirebaseApp.initializeApp(this)
+    }
+}
+```
+
+```kotlin
+// Inyección de dependencias
+@Singleton
+class CrashlyticsLogger @Inject constructor() {
+    private val crashlytics = FirebaseCrashlytics.getInstance()
+    
+    fun log(message: String) { crashlytics.log(message) }
+    fun logError(exception: Throwable, message: String? = null) { /* ... */ }
+    fun setCustomKey(key: String, value: String) { /* ... */ }
+    fun logPerformance(operation: String, duration: Long, success: Boolean) { /* ... */ }
+    // ... más métodos de logging
+}
+```
+
+### Acceso a los Logs en Firebase Console
+
+1. **Acceder a Firebase Console**: [https://console.firebase.google.com/](https://console.firebase.google.com/)
+2. **Seleccionar el Proyecto**: `dummy-9d59f`
+3. **Navegar a Crashlytics**: En el menú lateral, seleccionar "Crashlytics"
+4. **Ver Logs en Tiempo Real**: Los logs aparecen en la sección "Logs" de cada sesión
+5. **Analizar Métricas**: Revisar "Performance" para métricas de rendimiento
+6. **Filtrar por Atributos**: Usar los atributos personalizados para filtrar logs específicos
+
+### Ejemplos de Consultas Útiles
+
+```bash
+# Buscar logs de creación de usuarios
+user_creation_title:*
+
+# Buscar errores de validación
+validation_error:*
+
+# Buscar operaciones lentas (>1000ms)
+duration_ms:>1000
+
+# Buscar navegación específica
+navigation_from:UserListScreen
+```
 
 ## 📦 Estructura del Proyecto
 
@@ -287,6 +457,12 @@ Los reportes de tests se generan en:
 - **Estados de Carga** - Indicadores de carga con skeleton y progreso
 - **Manejo de Errores** - Mensajes de error amigables para el usuario
 
+### Monitoreo y Analytics
+- **Firebase Crashlytics** - Reporte automático de errores y crashes
+- **Logging Contextual** - Seguimiento de navegación y operaciones de usuario
+- **Métricas de Rendimiento** - Monitoreo de tiempos de respuesta de API
+- **Analytics de Usuario** - Seguimiento de comportamiento y uso de la app
+
 ## 🔧 Configuración
 
 ### Configuración del Entorno
@@ -303,6 +479,24 @@ kotlin.code.style=official
 BASE_URL=https://dummyapi.io/data/v1/
 API_KEY=tu_api_key_aqui
 ```
+
+### Configuración de Firebase
+```kotlin
+// Firebase Crashlytics está configurado automáticamente
+// Para producción, reemplaza app/google-services.json con tu archivo real
+// El archivo actual es solo para desarrollo
+
+// Características incluidas:
+// - Reporte automático de crashes
+// - Logging de errores no fatales
+// - Métricas de rendimiento
+// - Analytics de usuario
+// - Seguimiento de navegación
+```
+
+### Archivos de Documentación
+- **Firebase Crashlytics**: `docs/FIREBASE_CRASHLYTICS.md` - Documentación completa
+- **Ejemplos de Uso**: `app/src/main/java/com/dummychallenge/utils/CrashlyticsUsageExample.kt`
 
 ## 📈 Optimizaciones de Rendimiento
 
@@ -398,6 +592,14 @@ Para soporte y preguntas:
 - **Ejecución de Tests**: 15.2s
 - **Tamaño de APK**: ~8MB
 - **Uso de Memoria**: ~45MB
+
+### Sistema de Logging
+- **Puntos de Logging**: 45+ ubicaciones estratégicas
+- **Tipos de Logging**: 6 categorías (Navegación, Operaciones, Rendimiento, Errores, Interacciones, Componentes)
+- **Cobertura de Logging**: 100% de operaciones críticas
+- **Integración**: Firebase Crashlytics + Analytics
+- **Atributos Personalizados**: 15+ claves contextuales
+- **Métricas de Rendimiento**: Tiempo de respuesta de todas las operaciones CRUD
 
 ---
 

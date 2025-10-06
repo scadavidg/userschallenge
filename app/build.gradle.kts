@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -24,6 +26,14 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            
+            // Enable Crashlytics for release builds
+            isDebuggable = false
+            isShrinkResources = false
+        }
+        debug {
+            // Enable Crashlytics for debug builds (optional)
+            isDebuggable = true
         }
     }
     compileOptions {
@@ -80,6 +90,11 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
+    
+    // ===== FIREBASE =====
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
     
     // ===== TESTING =====
     // Unit Testing

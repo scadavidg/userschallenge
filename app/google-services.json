@@ -1,0 +1,29 @@
+{
+    "project_info": {
+      "project_number": "1082971628569",
+      "project_id": "dummy-9d59f",
+      "storage_bucket": "dummy-9d59f.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:1082971628569:android:89f1aa8e527e505a6df688",
+          "android_client_info": {
+            "package_name": "com.dummychallenge"
+          }
+        },
+        "oauth_client": [],
+        "api_key": [
+          {
+            "current_key": "AIzaSyDdnB2RI_6Jtqio4J4NAaQfrli020U1jSo"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": []
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }

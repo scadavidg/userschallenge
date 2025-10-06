@@ -8,12 +8,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.dummychallenge.utils.CrashlyticsLogger
 
 /**
  * Component for generating profile images using DiceBear API
@@ -24,11 +26,19 @@ fun ProfileImageGenerator(
     firstName: String,
     lastName: String,
     onImageUrlChange: (String) -> Unit,
+    crashlyticsLogger: CrashlyticsLogger? = null,
     modifier: Modifier = Modifier
 ) {
     val fullName = "$firstName $lastName".trim()
     val seed = if (fullName.length >= 2) fullName.replace(" ", "") else "nogender"
     val imageUrl = "https://api.dicebear.com/9.x/pixel-art/png?seed=$seed"
+    
+    // Log image generation
+    LaunchedEffect(seed) {
+        crashlyticsLogger?.log("Profile image generated")
+        crashlyticsLogger?.setCustomKey("image_seed", seed)
+        crashlyticsLogger?.setCustomKey("image_url", imageUrl)
+    }
     
     // Update parent with current image URL
     onImageUrlChange(imageUrl)

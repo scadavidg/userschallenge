@@ -12,6 +12,7 @@ import com.dummychallenge.ui.components.DeleteConfirmationDialog
 import com.dummychallenge.ui.components.ScreenType
 import com.dummychallenge.ui.components.UserListPagingComponent
 import com.dummychallenge.ui.navigation.Screen
+import com.dummychallenge.utils.CrashlyticsLogger
 import com.dummychallenge.viewmodel.UserListScreenViewModel
 
 /**
@@ -52,24 +53,34 @@ fun UserListScreen(
             hasMorePages = uiState.hasMorePages,
             error = uiState.error,
             onUserClick = { userId ->
+                viewModel.crashlyticsLogger.log("User clicked in list")
+                viewModel.crashlyticsLogger.setCustomKey("clicked_user_id", userId)
                 navController.navigate(Screen.UserDetail.createRoute(userId))
             },
             onEditClick = { userId ->
+                viewModel.crashlyticsLogger.log("Edit user clicked in list")
+                viewModel.crashlyticsLogger.setCustomKey("edit_clicked_user_id", userId)
                 navController.navigate(Screen.EditUser.createRoute(userId))
             },
             onDeleteClick = { userId ->
+                viewModel.crashlyticsLogger.log("Delete user clicked in list")
+                viewModel.crashlyticsLogger.setCustomKey("delete_clicked_user_id", userId)
                 viewModel.showDeleteDialog(userId)
             },
             onLoadMore = {
+                viewModel.crashlyticsLogger.log("Load more users clicked")
                 viewModel.loadMoreUsers()
             },
             onRetry = {
+                viewModel.crashlyticsLogger.log("Retry button clicked")
                 viewModel.refresh()
             },
             onCreateUser = {
+                viewModel.crashlyticsLogger.log("Create user button clicked from list")
                 navController.navigate(Screen.CreateUser.route)
             },
             onRefresh = {
+                viewModel.crashlyticsLogger.log("Refresh users triggered")
                 viewModel.refresh()
             }
         )

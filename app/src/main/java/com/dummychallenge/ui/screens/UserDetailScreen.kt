@@ -37,6 +37,12 @@ fun UserDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Log navigation to UserDetailScreen
+    LaunchedEffect(Unit) {
+        viewModel.crashlyticsLogger.logNavigation("UserListScreen", "UserDetailScreen")
+        viewModel.crashlyticsLogger.setCustomKey("detail_user_id", userId)
+    }
+
     // Load user data when screen initializes - using LaunchedEffect to avoid multiple loads
     LaunchedEffect(userId) {
         viewModel.loadUserDetail(userId)
@@ -45,6 +51,7 @@ fun UserDetailScreen(
     // Navigate when user is deleted successfully
     LaunchedEffect(uiState.userDeleted) {
         if (uiState.userDeleted) {
+            viewModel.crashlyticsLogger.logNavigation("UserDetailScreen", "UserListScreen")
             navController.navigate("userList") {
                 popUpTo("userList") { inclusive = true }
                 launchSingleTop = true
@@ -61,10 +68,14 @@ fun UserDetailScreen(
         },
         onEditClick = {
             uiState.userDetail?.let { user ->
+                viewModel.crashlyticsLogger.log("Edit user button clicked")
+                viewModel.crashlyticsLogger.setCustomKey("edit_user_id", user.id)
+                viewModel.crashlyticsLogger.setCustomKey("edit_user_email", user.email)
                 navController.navigate(Screen.EditUser.createRoute(user.id))
             }
         },
         onDeleteClick = {
+            viewModel.crashlyticsLogger.log("Delete user button clicked")
             viewModel.showDeleteDialog()
         }
     ) {

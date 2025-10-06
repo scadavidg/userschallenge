@@ -1,9 +1,15 @@
 package com.dummychallenge.utils
 
+import javax.inject.Inject
+import javax.inject.Singleton
+
 /**
  * Utility class to handle API error types and provide user-friendly messages
  */
-object ErrorHandler {
+@Singleton
+class ErrorHandler @Inject constructor(
+    private val crashlyticsLogger: CrashlyticsLogger
+) {
     
     /**
      * Enum representing different API error types
@@ -30,6 +36,10 @@ object ErrorHandler {
      * Get user-friendly error message based on API error type
      */
     fun getUserFriendlyMessage(errorType: ApiErrorType): String {
+        // Log error to Crashlytics
+        crashlyticsLogger.log("API Error: ${errorType.errorCode}")
+        crashlyticsLogger.setCustomKey("api_error_type", errorType.errorCode)
+        
         return when (errorType) {
             ApiErrorType.APP_ID_NOT_EXIST -> 
                 "Authentication error. Please contact support."
@@ -62,9 +72,15 @@ object ErrorHandler {
                 .removeSurrounding("\"")
                 .trim()
             
-            ApiErrorType.values().find { it.errorCode == errorValue } 
+            val errorType = ApiErrorType.values().find { it.errorCode == errorValue } 
                 ?: ApiErrorType.UNKNOWN
+            
+            // Log parsing attempt
+            crashlyticsLogger.log("Parsed API error: $errorValue -> ${errorType.errorCode}")
+            
+            errorType
         } catch (e: Exception) {
+            crashlyticsLogger.logError(e, "Failed to parse API error: $errorJson")
             ApiErrorType.UNKNOWN
         }
     }

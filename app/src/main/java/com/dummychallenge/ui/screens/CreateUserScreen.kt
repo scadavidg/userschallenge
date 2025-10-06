@@ -45,6 +45,7 @@ import com.dummychallenge.ui.components.AppScaffold
 import com.dummychallenge.ui.components.ErrorState
 import com.dummychallenge.ui.components.ProfileImageGenerator
 import com.dummychallenge.ui.components.ScreenType
+import com.dummychallenge.utils.CrashlyticsLogger
 import com.dummychallenge.viewmodel.CreateUserScreenViewModel
 import java.util.Calendar
 
@@ -55,6 +56,11 @@ fun CreateUserScreen(
     viewModel: CreateUserScreenViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Log navigation to CreateUserScreen
+    LaunchedEffect(Unit) {
+        viewModel.crashlyticsLogger.logNavigation("UserListScreen", "CreateUserScreen")
+    }
 
     // Local states for the form - precargados con datos de prueba
     var title by remember { mutableStateOf("Mr") }
@@ -76,6 +82,7 @@ fun CreateUserScreen(
     // Navigate back after successfully creating the user
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
+            viewModel.crashlyticsLogger.logNavigation("CreateUserScreen", "UserListScreen")
             navController.popBackStack()
         }
     }
@@ -87,6 +94,11 @@ fun CreateUserScreen(
             navController.popBackStack()
         },
         onSaveClick = {
+            viewModel.crashlyticsLogger.log("Create user button clicked")
+            viewModel.crashlyticsLogger.setCustomKey("form_title", title)
+            viewModel.crashlyticsLogger.setCustomKey("form_gender", gender)
+            viewModel.crashlyticsLogger.setCustomKey("form_email", email)
+            
             viewModel.createUser(
                 title = title,
                 firstName = firstName,
@@ -139,7 +151,8 @@ fun CreateUserScreen(
                     ProfileImageGenerator(
                         firstName = firstName,
                         lastName = lastName,
-                        onImageUrlChange = { picture = it }
+                        onImageUrlChange = { picture = it },
+                        crashlyticsLogger = viewModel.crashlyticsLogger
                     )
 
                     // Personal Information Card

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.domain.models.Result
 import com.domain.models.UserDetail
 import com.domain.usecases.CreateUserUseCase
+import com.dummychallenge.utils.CrashlyticsLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateUserScreenViewModel @Inject constructor(
     private val createUserUseCase: CreateUserUseCase,
+    val crashlyticsLogger: CrashlyticsLogger
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateUserUiState())
@@ -34,18 +36,24 @@ class CreateUserScreenViewModel @Inject constructor(
         phone: String,
         picture: String
     ) {
+        crashlyticsLogger.log("User creation initiated")
+        crashlyticsLogger.setCustomKey("user_creation_title", title)
+        crashlyticsLogger.setCustomKey("user_creation_gender", gender)
+        
         // Validate all required fields
         val validationError = validateUserData(
             title, firstName, lastName, gender, email, dateOfBirth, phone
         )
 
         if (validationError != null) {
+            crashlyticsLogger.logFormValidationError("CreateUser", "validation", validationError)
             _uiState.value = _uiState.value.copy(error = validationError)
             return
         }
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            val startTime = System.currentTimeMillis()
 
             val userDetail = UserDetail(
                 id = UUID.randomUUID().toString(),
@@ -63,8 +71,15 @@ class CreateUserScreenViewModel @Inject constructor(
                 updatedDate = java.time.LocalDateTime.now().toString()
             )
             val result = createUserUseCase(userDetail)
+            val duration = System.currentTimeMillis() - startTime
+            
             when (result) {
                 is Result.Success -> {
+                    crashlyticsLogger.log("User created successfully")
+                    crashlyticsLogger.logPerformance("createUser", duration, true)
+                    crashlyticsLogger.setCustomKey("created_user_id", result.data.id)
+                    crashlyticsLogger.setCustomKey("created_user_email", result.data.email)
+                    
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isSuccess = true,
@@ -73,6 +88,10 @@ class CreateUserScreenViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
+                    crashlyticsLogger.logNetworkError("createUser", result.message)
+                    crashlyticsLogger.logPerformance("createUser", duration, false)
+                    crashlyticsLogger.logError(Exception(result.message), "Failed to create user")
+                    
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = parseServerError(result.message)
@@ -142,21 +161,29 @@ class CreateUserScreenViewModel @Inject constructor(
 
     private fun parseServerError(errorMessage: String): String {
         return try {
+            crashlyticsLogger.log("Parsing server error: $errorMessage")
+            
             // Parse server error response
             if (errorMessage.contains("BODY_NOT_VALID")) {
                 if (errorMessage.contains("email")) {
+                    crashlyticsLogger.setCustomKey("server_error_type", "email_exists")
                     "Email already exists. Please use a different email address."
                 } else if (errorMessage.contains("gender")) {
+                    crashlyticsLogger.setCustomKey("server_error_type", "invalid_gender")
                     "Invalid gender value. Please select a valid gender."
                 } else if (errorMessage.contains("lastName")) {
+                    crashlyticsLogger.setCustomKey("server_error_type", "missing_lastname")
                     "Last name is required."
                 } else {
+                    crashlyticsLogger.setCustomKey("server_error_type", "invalid_data")
                     "Invalid data provided. Please check your input and try again."
                 }
             } else {
+                crashlyticsLogger.setCustomKey("server_error_type", "unknown")
                 errorMessage
             }
         } catch (e: Exception) {
+            crashlyticsLogger.logError(e, "Error parsing server error message")
             "An error occurred while creating the user. Please try again."
         }
     }

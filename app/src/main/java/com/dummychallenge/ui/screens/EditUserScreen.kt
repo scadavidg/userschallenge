@@ -45,6 +45,7 @@ import com.dummychallenge.ui.components.AppScaffold
 import com.dummychallenge.ui.components.ErrorState
 import com.dummychallenge.ui.components.ProfileImageGenerator
 import com.dummychallenge.ui.components.ScreenType
+import com.dummychallenge.utils.CrashlyticsLogger
 import com.dummychallenge.viewmodel.EditUserScreenViewModel
 import java.util.Calendar
 
@@ -56,6 +57,12 @@ fun EditUserScreen(
     viewModel: EditUserScreenViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Log navigation to EditUserScreen
+    LaunchedEffect(Unit) {
+        viewModel.crashlyticsLogger.logNavigation("UserDetailScreen", "EditUserScreen")
+        viewModel.crashlyticsLogger.setCustomKey("edit_user_id", userId)
+    }
     
     // Local states for the form
     var title by remember { mutableStateOf("") }
@@ -105,6 +112,11 @@ fun EditUserScreen(
             navController.popBackStack()
         },
         onSaveClick = {
+            viewModel.crashlyticsLogger.log("Update user button clicked")
+            viewModel.crashlyticsLogger.setCustomKey("update_form_title", title)
+            viewModel.crashlyticsLogger.setCustomKey("update_form_gender", gender)
+            viewModel.crashlyticsLogger.setCustomKey("update_form_email", email)
+            
             viewModel.updateUser(
                 userId = userId,
                 title = title,
@@ -158,7 +170,8 @@ fun EditUserScreen(
                     ProfileImageGenerator(
                         firstName = firstName,
                         lastName = lastName,
-                        onImageUrlChange = { picture = it }
+                        onImageUrlChange = { picture = it },
+                        crashlyticsLogger = viewModel.crashlyticsLogger
                     )
 
                     // Personal Information Card

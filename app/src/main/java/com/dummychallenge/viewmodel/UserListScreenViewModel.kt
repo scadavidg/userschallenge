@@ -6,6 +6,7 @@ import com.domain.models.Result
 import com.domain.models.UserPreview
 import com.domain.usecases.DeleteUserUseCase
 import com.domain.usecases.GetAllUserUseCase
+import com.dummychallenge.utils.CrashlyticsLogger
 import com.dummychallenge.utils.ErrorHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,9 @@ import javax.inject.Inject
 @HiltViewModel
 class UserListScreenViewModel @Inject constructor(
     private val getAllUserUseCase: GetAllUserUseCase,
-    private val deleteUserUseCase: DeleteUserUseCase
+    private val deleteUserUseCase: DeleteUserUseCase,
+    val crashlyticsLogger: CrashlyticsLogger,
+    private val errorHandler: ErrorHandler
 ) : ViewModel() {
 
     // Private mutable state for internal updates
@@ -46,6 +49,7 @@ class UserListScreenViewModel @Inject constructor(
     private fun loadInitialData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            crashlyticsLogger.log("Loading initial user data")
             
             when (val result = getAllUserUseCase(0)) {
                 is Result.Success -> {
@@ -55,6 +59,10 @@ class UserListScreenViewModel @Inject constructor(
                     currentPage = 0
                     totalPages = (userList.total / userList.limit) + if (userList.total % userList.limit > 0) 1 else 0
                     
+                    crashlyticsLogger.log("Successfully loaded ${filteredUsers.size} users")
+                    crashlyticsLogger.setCustomKey("total_users", userList.total)
+                    crashlyticsLogger.setCustomKey("users_per_page", userList.limit)
+                    
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         users = filteredUsers,
@@ -63,9 +71,10 @@ class UserListScreenViewModel @Inject constructor(
                     )
                 }
                 is Result.Error -> {
+                    crashlyticsLogger.logNetworkError("getAllUsers", result.message)
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = ErrorHandler.getErrorMessage(result.message)
+                        error = errorHandler.getErrorMessage(result.message)
                     )
                 }
                 is Result.Loading -> {
@@ -156,6 +165,9 @@ class UserListScreenViewModel @Inject constructor(
     fun deleteUser() {
         val userId = _uiState.value.userToDelete ?: return
         
+        crashlyticsLogger.log("User deletion initiated for user: $userId")
+        crashlyticsLogger.setCustomKey("deleted_user_id", userId)
+        
         // Add to locally deleted users list
         locallyDeletedUsers.add(userId)
         
@@ -173,6 +185,7 @@ class UserListScreenViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = deleteUserUseCase(userId)) {
                 is Result.Success -> {
+                    crashlyticsLogger.log("User successfully deleted: $userId")
                     // Remove user from cached pages to ensure consistency
                     cachedPages.forEach { (pageNumber, users) ->
                         cachedPages[pageNumber] = users.filter { it.id != userId }
@@ -189,7 +202,7 @@ class UserListScreenViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         users = currentUsers, // Restore original list
                         isLoading = false,
-                        error = ErrorHandler.getErrorMessage(result.message)
+                        error = errorHandler.getErrorMessage(result.message)
                     )
                 }
                 is Result.Loading -> {
