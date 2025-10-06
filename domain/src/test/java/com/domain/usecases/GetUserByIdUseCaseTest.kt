@@ -50,6 +50,7 @@ class GetUserByIdUseCaseTest {
                     email = "john.doe@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -165,6 +166,7 @@ class GetUserByIdUseCaseTest {
                     email = "test@example.com",
                     dateOfBirth = "2000-01-01",
                     phone = "000000000",
+                    country = "USA",
                     location = Location(
                         street = "Test St",
                         city = "Test City",

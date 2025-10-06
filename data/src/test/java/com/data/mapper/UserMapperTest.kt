@@ -97,6 +97,7 @@ class UserMapperTest {
                 email = "john.doe@example.com",
                 dateOfBirth = "1990-01-01",
                 phone = "123456789",
+                country = "USA",
                 location = sampleLocation,
                 registerDate = "2023-01-01",
                 updatedDate = "2023-01-01",

@@ -49,6 +49,7 @@ class UpdateUserUseCaseTest {
                     email = "john.doe@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -63,6 +64,7 @@ class UpdateUserUseCaseTest {
                     firstName = "Johnny",
                     lastName = "Doe-Smith",
                     phone = "987654321",
+                    country = "USA",
                     location = Location(
                         street = "Boston St",
                         city = "Boston",
@@ -96,6 +98,7 @@ class UpdateUserUseCaseTest {
                     email = "jane.smith@example.com",
                     dateOfBirth = "1992-05-15",
                     phone = "987654321",
+                    country = "USA",
                     location = Location(
                         street = "456 Oak Ave",
                         city = "Los Angeles",
@@ -148,6 +151,7 @@ class UpdateUserUseCaseTest {
                     email = "non@example.com",
                     dateOfBirth = "2000-01-01",
                     phone = "000000000",
+                    country = "USA",
                     location = Location(
                         street = "Nowhere St",
                         city = "Nowhere",
@@ -183,6 +187,7 @@ class UpdateUserUseCaseTest {
                     email = "existing@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -218,6 +223,7 @@ class UpdateUserUseCaseTest {
                     email = "invalid-email",
                     dateOfBirth = "",
                     phone = "",
+                    country = null,
                     location = null,
                     registerDate = "2023-01-01",
                     updatedDate = "2023-01-01"
@@ -252,6 +258,7 @@ class UpdateUserUseCaseTest {
                     email = "john.doe@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -290,6 +297,7 @@ class UpdateUserUseCaseTest {
                     email = "john.doe@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -328,6 +336,7 @@ class UpdateUserUseCaseTest {
                     email = "test@example.com",
                     dateOfBirth = "2000-01-01",
                     phone = "000000000",
+                    country = "USA",
                     location = Location(
                         street = "Test St",
                         city = "Test City",

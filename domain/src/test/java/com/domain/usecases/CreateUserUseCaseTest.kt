@@ -49,6 +49,7 @@ class CreateUserUseCaseTest {
                     email = "john.doe@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -85,6 +86,7 @@ class CreateUserUseCaseTest {
                     email = "jane.smith@example.com",
                     dateOfBirth = "1992-05-15",
                     phone = "987654321",
+                    country = "USA",
                     location = Location(
                         street = "456 Oak Ave",
                         city = "Los Angeles",
@@ -129,6 +131,7 @@ class CreateUserUseCaseTest {
                     email = "existing@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -166,6 +169,7 @@ class CreateUserUseCaseTest {
                     email = "invalid-email",
                     dateOfBirth = "",
                     phone = "",
+                    country = null,
                     location = null,
                     registerDate = "",
                     updatedDate = ""
@@ -202,6 +206,7 @@ class CreateUserUseCaseTest {
                     email = "john.doe@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -240,6 +245,7 @@ class CreateUserUseCaseTest {
                     email = "john.doe@example.com",
                     dateOfBirth = "1990-01-01",
                     phone = "123456789",
+                    country = "USA",
                     location = Location(
                         street = "123 Main St",
                         city = "New York",
@@ -278,6 +284,7 @@ class CreateUserUseCaseTest {
                     email = "test@example.com",
                     dateOfBirth = "2000-01-01",
                     phone = "000000000",
+                    country = "USA",
                     location = Location(
                         street = "Test St",
                         city = "Test City",

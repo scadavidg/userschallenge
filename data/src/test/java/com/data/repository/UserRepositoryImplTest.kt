@@ -1,5 +1,6 @@
 package com.data.repository
 
+import com.data.dto.DeleteUserResponseDto
 import com.data.dto.ListResponseDto
 import com.data.dto.LocationDto
 import com.data.dto.UserFullDto
@@ -330,6 +331,7 @@ class UserRepositoryImplTest {
                             email = "john.doe@example.com",
                             dateOfBirth = "1990-01-01",
                             phone = "123456789",
+                            country = "USA",
                             location =
                                 Location(
                                     street = "123 Main St",
@@ -393,6 +395,7 @@ class UserRepositoryImplTest {
                             email = "invalid-email",
                             dateOfBirth = "",
                             phone = "",
+                            country = null,
                             location = null,
                             registerDate = "",
                             updatedDate = "",
@@ -430,6 +433,7 @@ class UserRepositoryImplTest {
                             email = "existing@example.com",
                             dateOfBirth = "",
                             phone = "",
+                            country = null,
                             location = null,
                             registerDate = "",
                             updatedDate = "",
@@ -470,6 +474,7 @@ class UserRepositoryImplTest {
                             email = "john.doe@example.com",
                             dateOfBirth = "1990-01-01",
                             phone = "123456789",
+                            country = "USA",
                             location =
                                 Location(
                                     street = "456 Updated St",
@@ -533,6 +538,7 @@ class UserRepositoryImplTest {
                             email = "john.doe@example.com",
                             dateOfBirth = "",
                             phone = "",
+                            country = null,
                             location = null,
                             registerDate = "",
                             updatedDate = "",
@@ -569,6 +575,7 @@ class UserRepositoryImplTest {
                             email = "new-email@example.com",
                             dateOfBirth = "",
                             phone = "",
+                            country = null,
                             location = null,
                             registerDate = "",
                             updatedDate = "",
@@ -600,7 +607,7 @@ class UserRepositoryImplTest {
                 runTest {
                     // Given
                     val userId = "1"
-                    val successResponse = Response.success(userId)
+                    val successResponse = Response.success(DeleteUserResponseDto(userId))
 
                     coEvery { userService.deleteUser(userId) } returns successResponse
 
@@ -619,7 +626,7 @@ class UserRepositoryImplTest {
                     // Given
                     val userId = "999"
                     val errorResponse =
-                        Response.error<String>(
+                        Response.error<DeleteUserResponseDto>(
                             404,
                             "User not found".toResponseBody("text/plain".toMediaType()),
                         )
@@ -640,7 +647,7 @@ class UserRepositoryImplTest {
                 runTest {
                     // Given
                     val userId = "1"
-                    val successResponse = Response.success("different-id")
+                    val successResponse = Response.success(DeleteUserResponseDto("different-id"))
 
                     coEvery { userService.deleteUser(userId) } returns successResponse
 
@@ -658,7 +665,7 @@ class UserRepositoryImplTest {
                 runTest {
                     // Given
                     val userId = "1"
-                    val successResponse = Response.success<String>(null)
+                    val successResponse = Response.success(DeleteUserResponseDto(""))
 
                     coEvery { userService.deleteUser(userId) } returns successResponse
 

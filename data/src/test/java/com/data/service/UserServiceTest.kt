@@ -1,6 +1,7 @@
 package com.data.service
 
 import com.data.config.ApiConfig
+import com.data.dto.DeleteUserResponseDto
 import com.data.dto.ListResponseDto
 import com.data.dto.LocationDto
 import com.data.dto.UserCreateDto
@@ -435,7 +436,7 @@ class UserServiceTest {
                 runTest {
                     // Given
                     val userId = "1"
-                    val successResponse = Response.success(userId)
+                    val successResponse = Response.success(DeleteUserResponseDto(userId))
 
                     coEvery { userService.deleteUser(userId) } returns successResponse
 
@@ -445,7 +446,7 @@ class UserServiceTest {
                     // Then
                     assertTrue(result.isSuccessful)
                     assertNotNull(result.body())
-                    assertEquals(userId, result.body())
+                    assertEquals(userId, result.body()?.id)
                 }
 
             @Test
@@ -455,7 +456,7 @@ class UserServiceTest {
                     // Given
                     val userId = "999"
                     val errorResponse =
-                        Response.error<String>(
+                        Response.error<DeleteUserResponseDto>(
                             404,
                             "User not found".toResponseBody("text/plain".toMediaType()),
                         )

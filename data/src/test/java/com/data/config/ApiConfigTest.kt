@@ -134,7 +134,7 @@ class ApiConfigTest {
             @DisplayName("Then should have correct default limit")
             fun `should have correct default limit`() {
                 // When & Then
-                assertEquals(20, ApiConfig.DEFAULT_LIMIT)
+                assertEquals(10, ApiConfig.DEFAULT_LIMIT)
             }
         }
 
